@@ -1,0 +1,34 @@
+{
+	"descriptions": [
+
+		{
+			"datatype": "anat",
+			"suffix": "T1w",
+			"criteria": {
+				"SeriesDescription": "tfl_mgh"
+			}
+		},
+		{
+			"datatype": "dwi",
+			"suffix": "dwi",
+			"criteria": {
+				"SeriesDescription": "ep2d_diff_mgh_rorevro"
+			}
+		},
+		{
+			"datatype": "anat",
+			"suffix": "T2w",
+			"criteria": {
+				"SeriesDescription": "t2_tse_tra_256_pat2"
+			}
+		},
+		{
+			"datatype": "anat",
+			"suffix": "T2w",
+			"custom_entities": "acq-lowTE",
+			"criteria": {
+				"SeriesDescription": "t2_tse_tra_256_pat2_low_TE"
+			}
+		}
+	]
+}

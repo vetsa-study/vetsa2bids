@@ -1,0 +1,61 @@
+{		
+	"descriptions": [{
+			"datatype": "anat",
+			"suffix": "T1w",
+			"criteria": {
+				"SeriesDescription": "*FSPGR*"
+			}
+		},
+		{
+			"datatype": "anat",
+			"suffix": "T2w",
+			"custom_entities": "acq-3D",
+			"criteria": {
+				"SeriesDescription": "*T2*",
+				"MRAcquisitionType": "3D"
+			}
+		},
+		{
+			"datatype": "anat",
+			"suffix": "FLAIR",
+			"custom_entities": "acq-3D",
+			"criteria": {
+				"SeriesDescription": {"any" : ["*FLAIR*", "*flair*"]},
+				"MRAcquisitionType": "3D"
+			}
+		},
+		{
+			"datatype": "anat",
+			"suffix": "T2w",
+			"custom_entities": "acq-2D",
+			"criteria": {
+				"SeriesDescription": "*2D T2*",
+				"MRAcquisitionType": "2D"
+			}
+		},
+
+		{
+			"datatype": "anat",
+			"suffix": "PDw",
+			"criteria": {
+				"SeriesDescription": "*PD*"
+			}
+		},
+		{
+			"datatype": "dwi",
+			"suffix": "dwi",
+			"custom_entities": "acq-multi",
+			"criteria": {
+				"SeriesDescription": "*54*"
+			}
+		},
+		{
+			"datatype": "dwi",
+			"suffix": "dwi",
+			"custom_entities": "acq-single",
+			"criteria": {
+				"SeriesDescription": "*51*"
+				}
+			}
+	]
+}
