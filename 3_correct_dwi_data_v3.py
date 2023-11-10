@@ -9,6 +9,7 @@ This script corrects the dwi data for the VETSA3 dataset. The script does the fo
 - Flips the AP epi file in the phase encoding direction
 - Creates json files for the epi files
 - Overwrites the multi-shell bvals and bvecs files with correct values (dicomes report incorrect values)
+- Removes values from the bvecs/bvals files corresponding to epi scans
 """
 
 import os
@@ -29,13 +30,15 @@ def check_dwi_folder(vetsaid, bids_dir):
 
 def split_epis(dwi_file, epi_pa_file, epi_ap_file):
     """
-    Split off the first two volumes as epi files. The first volume is 
-    the AP epi file and the second volume is the PA epi file.
+    Save the first two volumes as epi files in the fmap folder. The first volume is 
+    the AP epi file and the second volume is the PA epi file. Remove the first (1)
+    volume from the dwi file because it is in the reverse phase encoding direction.
     """
     img = nib.load(dwi_file)
     data = img.get_fdata()
     nib.save(nib.Nifti1Image(data[:, :, :, 0], img.affine), epi_ap_file)
     nib.save(nib.Nifti1Image(data[:, :, :, 1], img.affine), epi_pa_file)
+    nib.save(nib.Nifti1Image(data[:, :, :, 1:], img.affine), dwi_file)
     return dwi_file, epi_pa_file, epi_ap_file
 
 def flip_ap_epi(epi_ap_file):
@@ -90,10 +93,11 @@ def process_multi_shell_data(vetsaid, bids_dir):
     - Renaming the dwi file
     - Renaming the dwi json file
     - Renaming the bvals and bvecs files
-    - Splitting off the first two volumes as epi files
+    - Save first two volumes as epi files and remove reverse encoded volume from dwi file
     - Flipping the AP epi file in the phase encoding direction
     - Creating json files for the epi files
     - Overwriting the bvals and bvecs files with correct values
+    - Removing the first value from the bvecs/bvals files corresponding to reverse encoded scan
     (Note: the bvals and bvecs files are overwritten because the values reported in the
     dicom header are incorrect for the multi-shell data)
     """
@@ -127,6 +131,23 @@ def process_multi_shell_data(vetsaid, bids_dir):
     bvecs_file_src = glob(os.path.expanduser(f'~/netshare/VETSA_NAS/MRI/DataSharing/VETSA_ID/VETSA3/{vetsaid}_v3_MB-DTI_ser*_bvecs.txt'))[0]
     shutil.copy(bvals_file_src, bvals_file_new)
     shutil.copy(bvecs_file_src, bvecs_file_new)
+    # Remove the first (1) value from the bvals file     
+    with open(bvals_file_new, 'r') as f_bvals:
+        bvals = f_bvals.read().split()
+        bvals_new = ' '.join(bvals[1:])
+    with open(bvals_file_new, 'w') as f_bvals:
+        f_bvals.write(bvals_new)
+    # Remove the first (1) value from each row of the bvecs file
+    with open(bvecs_file_new, 'r') as f_bvecs:
+        bvecs = f_bvecs.readlines()
+        bvecs_new = []
+        for row in bvecs:
+            row_values = row.split()
+            row_values_new = ' '.join(row_values[1:])
+            bvecs_new.append(row_values_new)
+        bvecs_new_str = '\n'.join(bvecs_new)
+    with open(bvecs_file_new, 'w') as f_bvecs:
+        f_bvecs.write(bvecs_new_str)
 
 
 def check_single_shell_data(vetsaid, bids_dir):
@@ -174,9 +195,10 @@ def process_single_shell_data(vetsaid, bids_dir):
     - Renaming the dwi file
     - Renaming the dwi json file
     - Renaming the bvals and bvecs files
-    - Splitting off the first two volumes as epi files
+    - Save first two volumes as epi files and remove reverse encoded volume from dwi file
     - Flipping the AP epi file in the phase encoding direction
     - Creating json files for the epi files
+    - Removing the first value from the bvecs/bvals files corresponding to reverse encoded scan
     (Note: the bvals and bvecs files are not overwritten because the values reported in the
     dicom header are correct for the single-shell data)
     """
@@ -204,6 +226,23 @@ def process_single_shell_data(vetsaid, bids_dir):
     single_dwi_file_new, single_epi_pa_file, single_epi_ap_file = split_epis(single_dwi_file_new, single_epi_pa_file, single_epi_ap_file)
     # Flip the phase encoding direction of the AP epi file
     single_epi_ap_file = flip_ap_epi(single_epi_ap_file)
+    # Remove the first (1) value from the bvals file
+    with open(bvals_file_new, 'r') as f_bvals:
+        bvals = f_bvals.read().split()
+        bvals_new = ' '.join(bvals[1:])
+    with open(bvals_file_new, 'w') as f_bvals:
+        f_bvals.write(bvals_new)
+    # Remove the first (1) value from each row of the bvecs file
+    with open(bvecs_file_new, 'r') as f_bvecs:
+        bvecs = f_bvecs.readlines()
+        bvecs_new = []
+        for row in bvecs:
+            row_values = row.split()
+            row_values_new = ' '.join(row_values[1:])
+            bvecs_new.append(row_values_new)
+        bvecs_new_str = '\n'.join(bvecs_new)
+    with open(bvecs_file_new, 'w') as f_bvecs:
+        f_bvecs.write(bvecs_new_str)
     # Create json files for the epi files
     single_epi_ap_json, single_epi_pa_json = create_single_shell_epi_jsons(vetsaid, bids_dir)
 
