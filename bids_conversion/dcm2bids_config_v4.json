@@ -1,0 +1,60 @@
+{
+	"descriptions": [
+
+		{
+			"datatype": "anat",
+			"suffix": "T1w",
+			"criteria": {
+				"SeriesDescription": "*T1 FSPGR*"
+			}
+		},
+		{
+			"datatype": "anat",
+			"suffix": "T2w",
+			"custom_entities": "acq-3D",
+			"criteria": {
+				"SeriesDescription": "*CUBE T2*"
+			}
+		},
+
+		{
+			"datatype": "anat",
+			"suffix": "FLAIR",
+			"custom_entities": "acq-3D",
+			"criteria": {
+				"SeriesDescription": "*FLAIR*"
+			}
+		},
+
+		{
+			"datatype": "dwi",
+			"suffix": "dwi",
+			"custom_entities": "acq-multi",
+			"criteria": {
+				"SeriesDescription": "*Pepolar*"
+			}
+		},
+
+		{
+			"datatype": "perf",
+			"suffix": "asl",
+			"criteria": {
+				"SeriesDescription": "*ASL*"
+			},
+			"sidecarChanges": {
+				"ArterialSpinLabelingType": "PCASL",
+				"LabelingDuration": 1.8,
+				"LabelingDistance": 95,
+				"PostLabelingDelay": 2.0,
+				"BackgroundSuppression": true,
+				"BackgroundSuppressionNumberPulses": 5,
+				"M0Type": "Included",
+				"TotalAcquiredPairs": 1,
+				"LabelingEfficiency": 0.6,
+				"RepetitionTimePreparation": 4.5,
+				"VascularCrushing": false,
+				"AcquisitionVoxelSize": [1.875, 1.875, 4]
+			}
+		}
+	]
+}

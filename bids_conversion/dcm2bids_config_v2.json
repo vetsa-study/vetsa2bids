@@ -1,0 +1,159 @@
+{
+    "descriptions": [
+        {
+            "datatype": "anat",
+            "suffix": "T1w",
+            "criteria": {
+                "SeriesDescription": {
+                    "any": [
+                        "MPRAGE_160sl_7deg",
+                        "FSPGR_SAG_TI450"
+                    ]
+                }
+            }
+        },
+        {
+            "datatype": "anat",
+            "suffix": "T2w",
+            "custom_entities": "acq-2D",
+            "criteria": {
+                "SeriesDescription": "*T2*"
+            }
+        },
+        {
+            "datatype": "anat",
+            "suffix": "PDw",
+            "criteria": {
+                "SeriesDescription": "*PD*"
+            }
+        },
+        {
+            "id": "id_dwi",
+            "datatype": "dwi",
+            "suffix": "dwi",
+            "custom_entities": "dir-AP",
+            "criteria": {
+                "SeriesDescription": {
+                    "any": [
+                        "*DTI*",
+                        "ep2d_diff_30directions_A-P"
+                    ]
+                }
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": [
+                "acq-dwi",
+                "dir-AP"
+            ],
+            "criteria": {
+                "SeriesDescription": "*ep2d_diff_B0_A-P*"
+            },
+            "sidecar_changes": {
+                "IntendedFor": [
+                    "id_dwi"
+                ]
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": [
+                "acq-dwi",
+                "dir-PA"
+            ],
+            "criteria": {
+                "SeriesDescription": "*ep2d_diff_B0_P-A*"
+            },
+            "sidecar_changes": {
+                "IntendedFor": [
+                    "id_dwi"
+                ]
+             }
+        },
+        {
+            "id": "id_task-rest",
+            "datatype": "func",
+            "suffix": "bold",
+            "custom_entities": "task-rest",
+            "criteria": {
+                "SeriesDescription": "fMRI_resting_state"
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": [
+                "acq-func",
+                "dir-AP"
+            ],
+            "criteria": {
+                "SeriesDescription": "fMRI_resting_state_dispmap reverse"
+            },
+            "sidecar_changes": {
+                "IntendedFor": [
+                    "id_task-rest"
+                ]
+        	}
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": [
+                "acq-func",
+                "dir-PA"
+            ],
+            "criteria": {
+                "SeriesDescription": "fMRI_resting_state_dispmap forward"
+            },
+            "sidecar_changes": {
+                "IntendedFor": [
+                    "id_task-rest"
+                ]
+        }
+        },  
+        {
+            "id": "id_task-rest",
+            "datatype": "func",
+            "suffix": "bold",
+            "custom_entities": "task-rest",
+            "criteria": {
+                "SeriesDescription": "fMRI_pepolar"
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": [
+                "acq-func",
+                "task-rest",
+                "dir-PA"
+            ],
+            "criteria": {
+                "SeriesDescription": "fMRI_calibration",
+                "PhaseEncodingDirection": "j"
+            },
+            "sidecar_changes": {
+            	"IntendedFor": "id_task-rest"
+        	}
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": [
+                "acq-func",
+                "task-rest",
+                "dir-AP"
+            ],
+            "criteria": {
+                "SeriesDescription": "fMRI_calibration",
+                "PhaseEncodingDirection": "j-"
+            },
+            "sidecar_changes": {
+            	"IntendedFor": "id_task-rest"
+        	}
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+	"descriptions": [
+
+		{
+			"datatype": "anat",
+			"suffix": "T1w",
+			"criteria": {
+				"SeriesDescription": "*tfl_mgh*"
+			}
+		},
+		{
+			"id": "id_dwi_BU",
+			"datatype": "dwi",
+			"suffix": "dwi",
+			"custom_entities": "dir-PA",
+			"criteria": {
+				"SeriesDescription": "ep2d_diff_mgh_rorevro",
+				"ManufacturersModelName": "Avanto" 
+			}
+		},
+      		{
+			"id": "id_dwi_UCSD",
+			"datatype": "dwi",
+			"suffix": "dwi",
+			"custom_entities": "dir-AP",
+			"criteria": {
+				"SeriesDescription": "ep2d_diff_mgh_rorevro",
+				"ManufacturersModelName": "Symphony" 
+			}
+		},
+		{
+			"datatype": "anat",
+			"suffix": "T2w",
+			"criteria": {
+				"SeriesDescription": {
+					"any": [
+						"t2_tse_tra_256_pat2",
+						"*T2_TSE*"
+					]
+					}
+			}
+		},
+		{
+			"datatype": "anat",
+			"suffix": "T2w",
+			"custom_entities": "acq-lowTE",
+			"criteria": {
+				"SeriesDescription": "t2_tse_tra_256_pat2_low_TE"
+			}
+		},
+		{
+			"datatype": "anat",
+			"suffix": "PDw",
+			"criteria": {
+				"SeriesDescription": "*PD_TSE*"
+			}
+		}
+	]
+}
