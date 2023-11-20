@@ -2,6 +2,8 @@ name: dcm2bids
 channels:
   - conda-forge
 dependencies:
-  - python>=3.7
+  - python>=3.10
   - dcm2niix
   - dcm2bids>=3.0.1
+  - nibabel>=5.0.1
+  - nipype>=1.8.6
