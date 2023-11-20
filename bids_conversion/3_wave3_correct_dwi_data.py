@@ -10,6 +10,17 @@ This script corrects the dwi data for the VETSA3 dataset. The script does the fo
 - Creates json files for the epi files
 - Overwrites the single and multi-shell bvals and bvecs files with correct values (dicomes report incorrect values)
 - Removes values from the bvecs/bvals files corresponding to epi scans
+
+Usage: python 3_wave3_correct_dwi_data.py <bids_dir> <subject_list_file>
+
+Arguments:
+    bids_dir: The path to the BIDS directory
+    subject_list_file: The path to a text file containing the list of subjects to process
+
+Note: 
+The bvals and bvecs files are overwritten based on custom tensor file. Requires that that template 
+bvecs and bvals files are located in the same directory as the script. The bvecs and bvals files are not 
+overwritten for the single-shell data because the values reported in the dicom header are correct.
 """
 
 import os
@@ -130,7 +141,8 @@ def process_multi_shell_data(vetsaid, bids_dir):
     - Overwriting the bvals and bvecs files with correct values
     - Removing the first value from the bvecs/bvals files corresponding to reverse encoded scan
     (Note: the bvals and bvecs files are overwritten because the values reported in the
-    dicom header are incorrect for the multi-shell data)
+    dicom header are incorrect for the multi-shell data. Requires template bvals and bvecs files in the
+    same directory as the script.)
     """
     # Rename dwi file
     multi_dwi_file = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-03', 'dwi', f'sub-{vetsaid}_ses-03_acq-multi_dwi.nii.gz')
@@ -162,8 +174,9 @@ def process_multi_shell_data(vetsaid, bids_dir):
     # Create json files for the epi files
     multi_epi_ap_json, multi_epi_pa_json = create_multi_shell_epi_jsons(vetsaid, bids_dir)
     # Overwrite the bvals and bvecs files
-    bvals_file_src = glob(os.path.expanduser(f'~/netshare/VETSA_NAS/MRI/DataSharing/VETSA_ID/VETSA3/{vetsaid}_v3_MB-DTI_ser*_bvals.txt'))[0]
-    bvecs_file_src = glob(os.path.expanduser(f'~/netshare/VETSA_NAS/MRI/DataSharing/VETSA_ID/VETSA3/{vetsaid}_v3_MB-DTI_ser*_bvecs.txt'))[0]
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    bvals_file_src = os.path.join(current_dir, 'vetsa_ucsd_multiband-dwi_bvals.txt')
+    bvecs_file_src = os.path.join(current_dir, 'vetsa_ucsd_multiband-dwi_bvecs.txt')
     shutil.copy(bvals_file_src, bvals_file_new)
     shutil.copy(bvecs_file_src, bvecs_file_new)
     # Remove the first (1) value from the bvals file     
@@ -258,7 +271,6 @@ def process_single_shell_data(vetsaid, bids_dir):
     remove_first_n_values(bvecs_file_new, 1)
     # Create json files for the epi files
     single_epi_ap_json, single_epi_pa_json = create_single_shell_epi_jsons(vetsaid, bids_dir)
-
 
 
 def main(bids_dir, subject_list_file):
