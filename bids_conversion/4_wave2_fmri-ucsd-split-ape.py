@@ -72,7 +72,7 @@ def get_site(func_file):
         func_site = "UCSD"
     else:
         print(f'Error in processing {func_file}. Unknown manufacturer model: {func_model}')
-        sys.exit(1)
+        return
     return func_site
 
 def get_nvols(func_file):
@@ -202,7 +202,8 @@ def process_func_run(vetsaid, bids_dir):
     # Check that func data was acquired at UCSD and has correct number of volumes
     func_check_correct = check_func_data(func_file)
     if not func_check_correct:
-        return
+        print(f'Subject {vetsaid} could not be processed successfully, skipping...')
+        return None
     # Split the functional run into separate files for each phase encoding direction
     func_file_AP, func_file_PA = split_func_run(func_file)
     # Create json sidecar for each split file
@@ -222,15 +223,18 @@ def main(bids_dir, subject_list_file):
 
     # Process each subject in the list
     for vetsaid in subject_list:
-        print(f'Processing subject {vetsaid}')
+        print(f'Start processing subject {vetsaid}')
 
         # Check if the func and fmap folders exist
         if not check_func_folder(vetsaid, bids_dir):
+            print('Functional folders for {vetsaid} not found, skipping...')
             continue
 
         # Process each functional run
-        merged_func_file, corrected_func_json = process_func_run(vetsaid, bids_dir)
-
+        result = process_func_run(vetsaid, bids_dir)
+        if result is None:
+            continue
+        print(f'Finished processing functional run for subject {vetsaid} successfully')
 
 
 if __name__ == '__main__':
