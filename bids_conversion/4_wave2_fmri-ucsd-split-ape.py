@@ -221,21 +221,37 @@ def main(bids_dir, subject_list_file):
     with open(subject_list_file, 'r') as f:
         subject_list = f.read().splitlines()
 
-    # Process each subject in the list
-    for vetsaid in subject_list:
-        print(f'Start processing subject {vetsaid}')
+        # Initialize empty lists for successful and unsuccessful subjects
+        successful_subjects = []
+        unsuccessful_subjects = []
 
-        # Check if the func and fmap folders exist
-        if not check_func_folder(vetsaid, bids_dir):
-            print('Functional folders for {vetsaid} not found, skipping...')
-            continue
+        # Process each subject in the list
+        for vetsaid in subject_list:
+            print(f'Start processing subject {vetsaid}')
 
-        # Process each functional run
-        result = process_func_run(vetsaid, bids_dir)
-        if result is None:
-            continue
-        print(f'Finished processing functional run for subject {vetsaid} successfully')
+            # Check if the func and fmap folders exist
+            if not check_func_folder(vetsaid, bids_dir):
+                print(f'Functional folders for {vetsaid} not found, skipping...')
+                unsuccessful_subjects.append(vetsaid)
+                continue
 
+            # Process each functional run
+            result = process_func_run(vetsaid, bids_dir)
+            if result is None:
+                unsuccessful_subjects.append(vetsaid)
+                continue
+            merged_func_file, corrected_func_json = result
+            print(f'Finished processing functional run for subject {vetsaid} successfully')
+            successful_subjects.append(vetsaid)
+
+        # Write the lists to files at the end of the script
+        with open(os.path.join(bids_dir, 'successful_subjects.txt'), 'w') as f:
+            for subject in successful_subjects:
+                f.write(f'{subject}\n')
+
+        with open(os.path.join(bids_dir, 'unsuccessful_subjects.txt'), 'w') as f:
+            for subject in unsuccessful_subjects:
+                f.write(f'{subject}\n')
 
 if __name__ == '__main__':
     
