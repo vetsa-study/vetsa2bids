@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
-This script performs some preliminary actions to the UCSD fMRI datacollected at UCSD. The
-data was collected using an an alternating pepolar sequence. Volumes were acquire with 2 
-phase encoding directions alternating each TR (A->P, P->A, A->P, P->A, etc). Additionally, 
-A->P were written to disk in reverse order along the y-axis. Visually, this appears as the
-brain flipping orientation along the y-axis on each volume. 
+This script performs some preliminary actions to fMRI data. The only step required for 
+data colected at BU is to add the "TaskName" field to the json sidecar. The UCSD requires
+more substantial pre-processing steps because the data was acquired using an alternating
+pepolar sequence. Volumes were acquire with 2 phase encoding directions alternating each 
+TR (A->P, P->A, A->P, P->A, etc). Additionally, A->P were written to disk in reverse order 
+along the y-axis. Visually, this appears as the brain flipping orientation along the y-axis 
+on each volume. 
 
 The current script performs the following actions:
 1. Checks that the functional run was acquired at UCSD and has the correct number of volumes.
@@ -14,7 +16,7 @@ The current script performs the following actions:
 the PA data.
 4. Creates json sidecar for each split file.
 5. Merge the data back together in an interleaved order. Odd numbered volumes (1-based) should 
-be A->P, even numbered volumes should be P->A.
+be A->P, even numbered volumes should be P->A. Creates a json file for this merged file. 
 
 There may be several strategies to deal with the alternating phase encoding directions. Some 
 examples are:
@@ -34,6 +36,9 @@ Option 3 has been shown to result in reasonable quality distortion correction, b
 of volumes (and doubling of effective TR) may not be ideal for fMRI data. Pre-processed images 
 resulting from options 1 and 2 should be closely inspected to ensure that the distortion correction
 was successful.
+
+If option 1 or 2 are chosen, it may be useful to additionally regress out the phase encoding
+direction from the data to remove residual effects of these differences. 
 """
 
 import os, sys
@@ -72,7 +77,7 @@ def get_site(func_file):
         func_site = "UCSD"
     else:
         print(f'Error in processing {func_file}. Unknown manufacturer model: {func_model}')
-        return
+        return None
     return func_site
 
 def get_nvols(func_file):
@@ -80,23 +85,6 @@ def get_nvols(func_file):
     img = nib.load(func_file)
     data = img.get_fdata()
     return data.shape[3]
-
-def check_func_data(func_file):
-    """
-    Checks that the functional run was acquired at UCSD and has the correct number of volumes.
-    It should have 100 volumes.
-    """
-    # Check that the functional run was acquired at UCSD
-    func_site = get_site(func_file)
-    if func_site != "UCSD":
-        print(f'Error in processing {func_file}. Functional run was acquired at acquired at {func_site}, not UCSD.')
-        return False
-    # Check that there are 100 volumes
-    func_nvols = get_nvols(func_file)
-    if func_nvols != 100:
-        print(f'Error in processing {func_file}. Functional run has {func_nvols} volumes, not 100.')
-        return False
-    return True
 
 
 def split_func_run(func_file): 
@@ -171,7 +159,7 @@ def create_split_func_json(func_file_AP, func_file_PA, func_json_file):
     return func_json_file_AP, func_json_file_PA
 
 
-def edit_bold_json(func_json_file):
+def edit_ucsd_bold_json(func_json_file):
     """
     Edits json sidecar of func file. 
     1. Removes the phase encoding direction from the func json file. This is necessary because the
@@ -192,17 +180,10 @@ def edit_bold_json(func_json_file):
     return func_json_file
 
 
-def process_func_run(vetsaid, bids_dir):
-    """
-    Processes the functional run for the given subject.
-    """
-    # Get the path to the functional run
-    func_dir = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'func')
-    func_file = os.path.join(func_dir, f'sub-{vetsaid}_ses-02_task-rest_bold.nii.gz')
-    # Check that func data was acquired at UCSD and has correct number of volumes
-    func_check_correct = check_func_data(func_file)
-    if not func_check_correct:
-        print(f'Subject {vetsaid} could not be processed successfully, skipping...')
+def process_ucsd_func(vetsaid, func_file):
+    func_nvols = get_nvols(func_file)
+    if func_nvols != 100:
+        print(f'Error in processing {func_file}. Functional run has {func_nvols} volumes, not 100.')
         return None
     # Split the functional run into separate files for each phase encoding direction
     func_file_AP, func_file_PA = split_func_run(func_file)
@@ -211,9 +192,50 @@ def process_func_run(vetsaid, bids_dir):
     # Merge the data back together
     merged_func_file = merge_func_files(func_file_AP, func_file_PA)
     # Remove phase encoding direction from func json files
-    corrected_func_json = edit_bold_json(func_file.replace('.nii.gz', '.json'))
+    corrected_func_json = edit_ucsd_bold_json(func_file.replace('.nii.gz', '.json'))
     # Return the merged func file and the corrected func json file    
     return merged_func_file, corrected_func_json
+
+def edit_BU_bold_json(func_json_file):
+    """
+    Edits json sidecar of func file. Adds TaskName field to the func json file.
+    """
+    # Add TaskName field to the func json file
+    with open(func_json_file, 'r') as f:
+        func_json = json.load(f)
+    func_json['TaskName'] = 'rest'
+    # Save the edited json file
+    with open(func_json_file, 'w') as f:
+        json.dump(func_json, f, indent=4)
+    return func_json_file
+
+
+def process_bu_func(func_file):
+    """
+    Adds the "TaskName" field to the json sidecar for the given functional run.
+    """
+    # Edit the json sidecar for the functional run
+    func_json_file = func_file.replace('.nii.gz', '.json')
+    func_json_file = edit_BU_bold_json(func_json_file)
+    return func_file, func_json_file
+
+
+def process_func_run(vetsaid, bids_dir):
+    """
+    Processes the functional run for the given subject.
+    """
+    # Get the path to the functional run
+    func_dir = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'func')
+    func_file = os.path.join(func_dir, f'sub-{vetsaid}_ses-02_task-rest_bold.nii.gz')
+    # Get site where data was collected
+    func_site = get_site(func_file)
+    if func_site == "BU":
+        return process_bu_func(func_file)
+    elif func_site == "UCSD":
+        return process_ucsd_func(vetsaid, func_file)
+    else:
+        print(f'Error in processing {func_file}. Unknown site')
+        return None
 
 
 def main(bids_dir, subject_list_file):
@@ -240,7 +262,6 @@ def main(bids_dir, subject_list_file):
             if result is None:
                 unsuccessful_subjects.append(vetsaid)
                 continue
-            merged_func_file, corrected_func_json = result
             print(f'Finished processing functional run for subject {vetsaid} successfully')
             successful_subjects.append(vetsaid)
 
