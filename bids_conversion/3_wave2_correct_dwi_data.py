@@ -121,7 +121,7 @@ def create_single_shell_epi_jsons(vetsaid, bids_dir):
         dwi_json = json.load(f)
     total_readout_time = dwi_json["TotalReadoutTime"]
     # Fill in the subject ID in the IntendedFor field
-    intended_for = f"bids::ses-02/dwi/sub-{vetsaid}_ses-02_acq-single_dir-PA_dwi.nii.gz"
+    intended_for = f"bids::sub-{vetsaid}/ses-02/dwi/sub-{vetsaid}_ses-02_acq-single_dir-PA_dwi.nii.gz"
     single_epi_ap_json_dict = {
         "PhaseEncodingDirection": "j-",
         "TotalReadoutTime": total_readout_time,
@@ -219,7 +219,7 @@ def process_single_shell_data_BU(vetsaid, bids_dir):
     single_epi_pa_json = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'fmap', f'sub-{vetsaid}_ses-02_acq-single_dir-PA_epi.json')
     with open(single_epi_pa_json, 'r') as f:
         single_epi_pa_json_dict = json.load(f)
-    single_epi_pa_json_dict["IntendedFor"] = f"bids::ses-02/dwi/sub-{vetsaid}_ses-02_acq-single_dir-PA_dwi.nii.gz"
+    single_epi_pa_json_dict["IntendedFor"] = f"bids::sub-{vetsaid}/ses-02/dwi/sub-{vetsaid}_ses-02_acq-single_dir-PA_dwi.nii.gz"
     with open(single_epi_pa_json, 'w') as f:
         json.dump(single_epi_pa_json_dict, f, indent=4)
 

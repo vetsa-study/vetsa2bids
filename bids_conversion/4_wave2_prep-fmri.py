@@ -158,6 +158,21 @@ def create_split_func_json(func_file_AP, func_file_PA, func_json_file):
         json.dump(func_json_PA, f, indent=4)
     return func_json_file_AP, func_json_file_PA
 
+def add_intended(fmap_json, intended_for):
+    """
+    Adds "IntendedFor" field to the json sidecar for the given fieldmap listing corresponding
+    functional run. The path should be relative to the subject directory and start with
+    bids:: (e.g., bids::ses-02/func/sub-<vetsaid>_ses-02_task-rest_bold.nii.gz). If the
+    fmap json file does not exist, skip.
+    """
+    if not os.path.isfile(fmap_json):
+        print(f'No json file found for {fmap_json}. Skipping...')
+        return
+    with open(fmap_json, 'r') as f:
+        fmap_json = json.load(f)
+    fmap_json['IntendedFor'] = intended_for
+    with open(fmap_json, 'w') as f:
+        json.dump(fmap_json, f, indent=4)
 
 def edit_ucsd_bold_json(func_json_file):
     """
@@ -193,12 +208,20 @@ def process_ucsd_func(vetsaid, func_file):
     merged_func_file = merge_func_files(func_file_AP, func_file_PA)
     # Remove phase encoding direction from func json files
     corrected_func_json = edit_ucsd_bold_json(func_file.replace('.nii.gz', '.json'))
+    # Add IntendedFor field to fmap json files
+    fmap_AP_json = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'fmap', f'sub-{vetsaid}_ses-02_acq-func_dir-AP_epi.json')
+    intended_for_AP = func_file_AP.replace(f"{bids_dir}/", "bids::")
+    add_intended(fmap_AP_json, intended_for_AP)
+    fmap_PA_json = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'fmap', f'sub-{vetsaid}_ses-02_acq-func_dir-PA_epi.json')
+    intended_for_PA = func_file_PA.replace(f"{bids_dir}/", "bids::")
+    add_intended(fmap_PA_json, intended_for_PA)
     # Return the merged func file and the corrected func json file    
     return merged_func_file, corrected_func_json
 
+
 def edit_BU_bold_json(func_json_file):
     """
-    Edits json sidecar of func file. Adds TaskName field to the func json file.
+    Edits json sidecar of func file. Adds TaskName field to the func json file. 
     """
     # Add TaskName field to the func json file
     with open(func_json_file, 'r') as f:
@@ -210,13 +233,21 @@ def edit_BU_bold_json(func_json_file):
     return func_json_file
 
 
-def process_bu_func(func_file):
+def process_bu_func(vetsaid, func_file):
     """
     Adds the "TaskName" field to the json sidecar for the given functional run.
+    Adds "IntendedFor" field to the json sidecar for the given fieldmap.
     """
     # Edit the json sidecar for the functional run
     func_json_file = func_file.replace('.nii.gz', '.json')
     func_json_file = edit_BU_bold_json(func_json_file)
+    # Edit the json sidecar for the AP fieldmap
+    fmap_AP_json = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'fmap', f'sub-{vetsaid}_ses-02_acq-func_dir-AP_epi.json')
+    intended_for = func_file.replace(f"{bids_dir}/", "bids::")
+    add_intended(fmap_AP_json, intended_for)
+    intended_for = func_file.replace(f"{bids_dir}/", "bids::")
+    fmap_PA_json = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'fmap', f'sub-{vetsaid}_ses-02_acq-func_dir-PA_epi.json')
+    add_intended(fmap_PA_json, intended_for)
     return func_file, func_json_file
 
 
@@ -230,7 +261,7 @@ def process_func_run(vetsaid, bids_dir):
     # Get site where data was collected
     func_site = get_site(func_file)
     if func_site == "BU":
-        return process_bu_func(func_file)
+        return process_bu_func(vetsaid, func_file)
     elif func_site == "UCSD":
         return process_ucsd_func(vetsaid, func_file)
     else:
