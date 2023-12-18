@@ -111,7 +111,7 @@ def create_multi_shell_epi_jsons(vetsaid, bids_dir):
         dwi_json = json.load(f)
     total_readout_time = dwi_json["TotalReadoutTime"]
     # Fill in the subject ID in the IntendedFor field
-    intended_for = f"ses-03/dwi/sub-{vetsaid}_ses-03_acq-multi_dir-PA_dwi.nii.gz"
+    intended_for = f"bids::ses-03/dwi/sub-{vetsaid}_ses-03_acq-multi_dir-PA_dwi.nii.gz"
     multi_epi_ap_json_dict = {
         "PhaseEncodingDirection": "j-",
         "TotalReadoutTime": total_readout_time,
@@ -208,7 +208,7 @@ def create_single_shell_epi_jsons(vetsaid, bids_dir):
         dwi_json = json.load(f)
     total_readout_time = dwi_json["TotalReadoutTime"]
     # Fill in the subject ID in the IntendedFor field
-    intended_for = f"ses-03/dwi/sub-{vetsaid}_ses-03_acq-single_dir-PA_dwi.nii.gz"
+    intended_for = f"bids::ses-03/dwi/sub-{vetsaid}_ses-03_acq-single_dir-PA_dwi.nii.gz"
     single_epi_ap_json_dict = {
         "PhaseEncodingDirection": "j-",
         "TotalReadoutTime": total_readout_time,

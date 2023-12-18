@@ -31,7 +31,7 @@ def check_dwi_folder(vetsaid, bids_dir):
 
 def check_single_shell_data(vetsaid, bids_dir):
     """Check if the single-shell data exists"""
-    single_dwi_file = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dwi.nii.gz')
+    single_dwi_file = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dir-AP_dwi.nii.gz')
     if not os.path.isfile(single_dwi_file):
         print('No single-shell data found')
         return False
@@ -44,7 +44,7 @@ def get_site(vetsaid, bids_dir):
     BU data was collected on a Siemens TrioTim.
     UCSD data was colected on a GE DISCOVERY MR750. 
     """
-    dwi_json_file = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dwi.json')
+    dwi_json_file = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dir-AP_dwi.json')
     with open(dwi_json_file, 'r') as f:
         dwi_json = json.load(f)
     dwi_model = dwi_json["ManufacturersModelName"]
@@ -121,7 +121,7 @@ def create_single_shell_epi_jsons(vetsaid, bids_dir):
         dwi_json = json.load(f)
     total_readout_time = dwi_json["TotalReadoutTime"]
     # Fill in the subject ID in the IntendedFor field
-    intended_for = f"ses-02/dwi/sub-{vetsaid}_ses-02_acq-single_dir-PA_dwi.nii.gz"
+    intended_for = f"bids::ses-02/dwi/sub-{vetsaid}_ses-02_acq-single_dir-PA_dwi.nii.gz"
     single_epi_ap_json_dict = {
         "PhaseEncodingDirection": "j-",
         "TotalReadoutTime": total_readout_time,
@@ -219,7 +219,7 @@ def process_single_shell_data_BU(vetsaid, bids_dir):
     single_epi_pa_json = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'fmap', f'sub-{vetsaid}_ses-02_acq-single_dir-PA_epi.json')
     with open(single_epi_pa_json, 'r') as f:
         single_epi_pa_json_dict = json.load(f)
-    single_epi_pa_json_dict["IntendedFor"] = f"ses-02/dwi/sub-{vetsaid}_ses-02_acq-single_dir-PA_dwi.nii.gz"
+    single_epi_pa_json_dict["IntendedFor"] = f"bids::ses-02/dwi/sub-{vetsaid}_ses-02_acq-single_dir-PA_dwi.nii.gz"
     with open(single_epi_pa_json, 'w') as f:
         json.dump(single_epi_pa_json_dict, f, indent=4)
 
@@ -239,7 +239,7 @@ def process_single_shell_data_UCSD(vetsaid, bids_dir):
     dicom header are correct for the single-shell data)
     """       
     # Rename dwi file
-    single_dwi_file = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dwi.nii.gz')
+    single_dwi_file = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dir-AP_dwi.nii.gz')
     single_dwi_file_new = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dir-PA_dwi.nii.gz')
     shutil.move(single_dwi_file, single_dwi_file_new)
     # Check if the dwi file has the correct number of volumes
@@ -247,12 +247,12 @@ def process_single_shell_data_UCSD(vetsaid, bids_dir):
         print(f'Error: Incorrect number of volumes in dwi file for subject {vetsaid}')
         return    
     # Rename dwi json file
-    single_dwi_json_file = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dwi.json')
+    single_dwi_json_file = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dir-AP_dwi.json')
     single_dwi_json_file_new = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dir-PA_dwi.json')
     shutil.move(single_dwi_json_file, single_dwi_json_file_new)
     # Rename bvals and bvecs files
-    bvals_file = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dwi.bval')
-    bvecs_file = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dwi.bvec')
+    bvals_file = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dir-AP_dwi.bval')
+    bvecs_file = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dir-AP_dwi.bvec')
     bvals_file_new = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dir-PA_dwi.bval')
     bvecs_file_new = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'dwi', f'sub-{vetsaid}_ses-02_acq-single_dir-PA_dwi.bvec')
     shutil.move(bvals_file, bvals_file_new)
