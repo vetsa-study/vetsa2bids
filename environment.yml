@@ -1,4 +1,4 @@
-name: dcm2bids
+name: vetsa2bids
 channels:
   - conda-forge
 dependencies:
@@ -7,3 +7,4 @@ dependencies:
   - dcm2bids>=3.0.1
   - nibabel>=5.0.1
   - nipype>=1.8.6
+  - pandas>=2.1.*
