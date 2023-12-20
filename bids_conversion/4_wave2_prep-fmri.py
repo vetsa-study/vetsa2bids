@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-This script performs some preliminary actions to fMRI data. The only step required for 
-data colected at BU is to add the "TaskName" field to the json sidecar. The UCSD requires
-more substantial pre-processing steps because the data was acquired using an alternating
-pepolar sequence. Volumes were acquire with 2 phase encoding directions alternating each 
-TR (A->P, P->A, A->P, P->A, etc). Additionally, A->P were written to disk in reverse order 
-along the y-axis. Visually, this appears as the brain flipping orientation along the y-axis 
-on each volume. 
+This script performs some preliminary actions to fMRI data. The only steps required for 
+data colected at BU is to edit json sidecars (1. add "TaskName"=="rest" field, 2. add
+"IntendedFor" field to fmap jsons, 3. flip phase encoding direction of AP fmap to "j". 
+The UCSD requires more substantial pre-processing steps because the data was acquired using 
+an alternating pepolar sequence. Volumes were acquire with 2 phase encoding directions 
+alternating each TR (A->P, P->A, A->P, P->A, etc). Additionally, A->P were written to disk 
+in reverse order along the y-axis. Visually, this appears as the brain flipping orientation 
+along the y-axis on each volume. 
 
 The current script performs the following actions:
 1. Checks that the functional run was acquired at UCSD and has the correct number of volumes.
@@ -237,6 +238,7 @@ def process_bu_func(vetsaid, func_file):
     """
     Adds the "TaskName" field to the json sidecar for the given functional run.
     Adds "IntendedFor" field to the json sidecar for the given fieldmap.
+    Change PhaseEncodingDirection to j for AP fieldmap.
     """
     # Edit the json sidecar for the functional run
     func_json_file = func_file.replace('.nii.gz', '.json')
@@ -246,6 +248,12 @@ def process_bu_func(vetsaid, func_file):
     intended_for = func_file.replace(f"{bids_dir}/", "bids::")
     add_intended(fmap_AP_json, intended_for)
     intended_for = func_file.replace(f"{bids_dir}/", "bids::")
+    with open(fmap_AP_json, 'r') as f:
+        fmap_AP_data = json.load(f)
+    fmap_AP_data['PhaseEncodingDirection'] = "j"
+    with open(fmap_AP_json, 'w') as f:
+        json.dump(fmap_AP_data, f, indent=4)
+    # Edit the json sidecar for the AP fieldmap
     fmap_PA_json = os.path.join(bids_dir, f'sub-{vetsaid}', 'ses-02', 'fmap', f'sub-{vetsaid}_ses-02_acq-func_dir-PA_epi.json')
     add_intended(fmap_PA_json, intended_for)
     return func_file, func_json_file
