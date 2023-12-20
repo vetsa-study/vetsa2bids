@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 """
-This script corrects the dwi data for the VETSA2 UCSD dataset. The script does the following:
+This script corrects the dwi data for the VETSA2 UCSD and BU dataset. The script does the following:
+UCSD:
 - Renames the dwi files
 - Renames the dwi json files
 - Renames the bvals and bvecs files
@@ -10,6 +11,12 @@ This script corrects the dwi data for the VETSA2 UCSD dataset. The script does t
 - Creates json files for the epi files
 - Overwrites the single-shell bvals and bvecs files with correct values (dicoms report incorrect values)
 - Removes values from the bvecs/bvals files corresponding to epi scans
+
+BU:
+- Splits the dwi file into two files (one for each phase encoding direction)
+- Splits the bvals and bvecs files into two files (one for each phase encoding direction)
+- Creates json file for the new PA dwi file
+- Edits the json file for the PA epi file to include the correct IntendedFor field
 """
 
 import os
