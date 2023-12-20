@@ -5,7 +5,12 @@
 			"datatype": "anat",
 			"suffix": "T1w",
 			"criteria": {
-				"SeriesDescription": "*tfl_mgh*"
+				"SeriesDescription": {
+					"any": [
+						"*tfl_mgh*",
+						"*MPRAGE*"
+					]
+					}
 			}
 		},
 		{

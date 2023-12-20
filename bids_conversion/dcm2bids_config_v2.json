@@ -31,7 +31,9 @@
             "id": "id_dwi",
             "datatype": "dwi",
             "suffix": "dwi",
-            "custom_entities": "dir-AP",
+            "custom_entities": ["acq-single",
+            			"dir-AP"
+            ],
             "criteria": {
                 "SeriesDescription": {
                     "any": [
@@ -45,7 +47,7 @@
             "datatype": "fmap",
             "suffix": "epi",
             "custom_entities": [
-                "acq-dwi",
+                "acq-single",
                 "dir-AP"
             ],
             "criteria": {
@@ -61,7 +63,7 @@
             "datatype": "fmap",
             "suffix": "epi",
             "custom_entities": [
-                "acq-dwi",
+                "acq-single",
                 "dir-PA"
             ],
             "criteria": {
@@ -79,8 +81,12 @@
             "suffix": "bold",
             "custom_entities": "task-rest",
             "criteria": {
-                "SeriesDescription": "fMRI_resting_state"
+                "SeriesDescription": {
+                	"any": ["fMRI_resting_state",
+                		"fMRI_pepolar"
+                		]
             }
+        }
         },
         {
             "datatype": "fmap",
@@ -115,20 +121,10 @@
         }
         },  
         {
-            "id": "id_task-rest",
-            "datatype": "func",
-            "suffix": "bold",
-            "custom_entities": "task-rest",
-            "criteria": {
-                "SeriesDescription": "fMRI_pepolar"
-            }
-        },
-        {
             "datatype": "fmap",
             "suffix": "epi",
             "custom_entities": [
                 "acq-func",
-                "task-rest",
                 "dir-PA"
             ],
             "criteria": {
@@ -144,7 +140,6 @@
             "suffix": "epi",
             "custom_entities": [
                 "acq-func",
-                "task-rest",
                 "dir-AP"
             ],
             "criteria": {
