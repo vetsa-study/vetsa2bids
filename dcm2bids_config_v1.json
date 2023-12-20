@@ -17,7 +17,7 @@
 			"id": "id_dwi_BU",
 			"datatype": "dwi",
 			"suffix": "dwi",
-			"custom_entities": "dir-PA",
+			"custom_entities": "dir-AP",
 			"criteria": {
 				"SeriesDescription": "ep2d_diff_mgh_rorevro",
 				"ManufacturersModelName": "Avanto" 
