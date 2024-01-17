@@ -317,7 +317,7 @@ if __name__ == '__main__':
     
     # Check if the correct number of arguments was provided
     if len(sys.argv) != 3:
-        print('Usage: python 4_wave2_fmri-sdc-ucsd.py <bids_dir> <subject_list_file>')
+        print('Usage: python 4_wave2_prep-fmri.py <bids_dir> <subject_list_file>')
         sys.exit(1)
 
     # Get the path to the BIDS data and the subject list file from the command line arguments
