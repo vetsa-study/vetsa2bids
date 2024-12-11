@@ -18,18 +18,23 @@ def get_vetsaid_to_cid(key):
     return vetsaid_to_cid
 
 
-def main(bids_dir, key_file):
+def main(bids_dir, key_file, subjects_list=None):
     # Read in the key file. Both columns should be strings
     key = pd.read_csv(key_file, dtype=str)
     # Get the mapping from VETSAID to CID
     id_mapper = get_vetsaid_to_cid(key)
-    # Get the list of subjects in the bids directory. These folders begin with "sub-" followed by VETSAID.
-    subjects = [f for f in os.listdir(bids_dir) if f.startswith('sub-')]
+    
+    # Get the list of subjects
+    if subjects_list is None:
+        subjects = [f for f in os.listdir(bids_dir) if f.startswith('sub-')]
+    else:
+        subjects = subjects_list
+    
     # Loop through the subjects
     for subject in subjects:
         # Get the VETSAID
         vetsaid = subject.split('-')[1]
-        # Id VETSAID is not in the key file, skip it
+        # If VETSAID is not in the key file, skip it
         if vetsaid not in id_mapper:
             print(f'VETSAID {vetsaid} not in key file. Skipping...')
             continue
@@ -45,10 +50,10 @@ def main(bids_dir, key_file):
             # Get the new file name
             new_file_name = subject_file.replace(vetsaid, cid)
             # Rename the file
-            os.rename(os.path.join(bids_dir, 'sub-' + cid, subject_file), os.path.join(bids_dir, 'sub-' + cid, new_file_name))
+            os.rename(subject_file, new_file_name)
             # If the file is a json file, search for substring matching VETSAID in the file contents and replace with CID
             if new_file_name.endswith('.json'):
-                with open(os.path.join(bids_dir, 'sub-' + cid, new_file_name), 'r+') as f:
+                with open(new_file_name, 'r+') as f:
                     content = f.read()
                     content = content.replace(vetsaid, cid)
                     f.seek(0)
@@ -61,8 +66,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Recodes VETSAID to CID for the VETSA dataset')
     parser.add_argument('-b', '--bids_dir', required=True, help='Path to the bids directory')
     parser.add_argument('-k', '--key', required=True, help='Path to the key file containing the mapping from VETSAID to CID')
+    parser.add_argument('-s', '--subjects_list', nargs='*', help='List of subjects to process')
     args = parser.parse_args()
     bids_dir = args.bids_dir
     key_file = args.key
+    subjects_list = args.subjects_list
 
-    main(bids_dir, key_file)
+    main(bids_dir, key_file, subjects_list)
