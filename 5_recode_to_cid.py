@@ -21,6 +21,10 @@ def get_vetsaid_to_cid(key):
 def main(bids_dir, key_file, subjects_list=None):
     # Read in the key file. Both columns should be strings
     key = pd.read_csv(key_file, dtype=str)
+
+    # Set column names to uppercase
+    key.columns = key.columns.str.upper()
+    
     # Get the mapping from VETSAID to CID
     id_mapper = get_vetsaid_to_cid(key)
     
