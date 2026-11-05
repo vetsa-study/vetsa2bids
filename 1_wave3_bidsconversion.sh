@@ -8,7 +8,7 @@
  # Activate dcm2bids environment 
 conda activate dcm2bids
 
-for vetsaid in `cat misc/1.txt`
+for vetsaid in `cat sublist_v3.txt`
 do
 	echo "Starting conversion of ${vetsaid}..."
 

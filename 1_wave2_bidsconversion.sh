@@ -6,7 +6,7 @@
  # Activate dcm2bids environment 
 #conda activate dcm2bids
 
-for vetsaid in `cat redofmrisublist.txt`
+for vetsaid in `cat sublist_v2.txt`
 do
 	echo "Starting conversion of ${vetsaid}..."
 
