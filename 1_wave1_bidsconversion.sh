@@ -11,7 +11,7 @@ do
 	echo "Starting conversion of ${vetsaid}..."
 
 	#run dcm2bids.
-	dcm2bids -d ~/netshare/SYNVETSACOPY/data/vetsa/VETSA1/orig/${vetsaid}/ -p ${vetsaid} -s ses-01 -c ~/netshare/M/MRI/BIDS/code/dcm2bids_config_v1.json -o ~/netshare/M/MRI/BIDS/data/
+	dcm2bids -d ~/netshare/SYNVETSACOPY/data/vetsa/VETSA1/orig/${vetsaid}/ -p ${vetsaid} -s ses-01 -c ~/netshare/M/MRI/BIDS/code/vetsa2bids/dcm2bids_config_v1.json -o ~/netshare/M/MRI/BIDS/data/
 	
 	echo "Finished converting ${vetsaid}."
 done
