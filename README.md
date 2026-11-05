@@ -1,105 +1,84 @@
-# VETSA BIDS Processing Pipeline
+# VETSA DICOM-to-BIDS Processing
 
-Scripts for converting and preprocessing neuroimaging data from the Vietnam Era Twin Study of Aging (VETSA) into BIDS format across multiple data collection waves.
+This repository contains scripts and `dcm2bids` configurations for converting Vietnam Era Twin Study of Aging (VETSA) imaging data from DICOM into BIDS, followed by project-specific DWI, fMRI, run-selection, and subject-ID processing.
 
-## Overview
+## Waves and sessions
 
-This repository contains scripts to:
+| Wave | BIDS session | DICOM conversion | DWI correction |
+|---|---|---|---|
+| VETSA 1 | `ses-01` | `1_wave1_bidsconversion.sh`, `dcm2bids_config_v1.json` | `3_wave1_correct_dwi_data.py` |
+| VETSA 2 | `ses-02` | `1_wave2_bidsconversion.sh`, `dcm2bids_config_v2.json` | `3_wave2_correct_dwi_data.py` |
+| VETSA 3 | `ses-03` | `1_wave3_bidsconversion.sh`, `dcm2bids_config_v3.json` | `3_wave3_correct_dwi_data.py` |
+| VETSA 4 | `ses-04` | `1_wave4_bidsconversion.sh`, `dcm2bids_config_v4.json` | `3_wave4_correct_dwi_data.py` |
 
-1. Convert DICOM files to BIDS format using [dcm2bids](https://github.com/UNFmontreal/Dcm2Bids)
-2. Correct DWI data organization and metadata
-3. Process fMRI data and metadata  
-4. Recode subject IDs
+Review the wave-specific configurations against the DICOM metadata for the data being converted before running a large batch.
 
-## Requirements
+## Requirements and setup
 
-```yml
-- python >= 3.10
-- dcm2niix
-- dcm2bids >= 3.0.1  
-- nibabel >= 5.0.1
-- nipype >= 1.8.6
-- pandas >= 2.1.*
-```
-
-## Usage
-
-### 1. DICOM to BIDS Conversion
-
-Convert DICOM files to BIDS format for each wave:
+The Conda environment is defined in [`environment.yml`](environment.yml) and includes Python 3.10 or later, `dcm2niix`, `dcm2bids`, `nibabel`, `nipype`, and `pandas`.
 
 ```bash
-./1_wave1_bidsconversion.sh  # VETSA1 data
-./1_wave2_bidsconversion.sh  # VETSA2 data
-./1_wave3_bidsconversion.sh  # VETSA3 data
-./1_wave4_bidsconversion.sh  # VETSA4 data
+conda env create -f environment.yml
+conda activate vetsa2bids
 ```
 
-Uses wave-specific configuration files: 
+Run the scripts from this repository with the environment active. Conversion scripts invoke `dcm2bids`; the Python processing scripts use the packages listed in the environment.
 
-```
-dcm2bids_config_v1.json 
-dcm2bids_config_v2.json
-dcm2bids_config_v3.json
-dcm2bids_config_v4.json
-```
+## Typical workflow
 
-### 2. Delete Excluded Runs
+1. **Configure and run DICOM conversion.** Each `1_wave*_bidsconversion.sh` script contains local paths for its DICOM input, subject list, BIDS output, and configuration. Update these paths and the subject-list file for your environment before running it:
 
-Remove unwanted imaging runs based on a CSV file:
+   ```bash
+   ./1_wave1_bidsconversion.sh
+   ./1_wave2_bidsconversion.sh
+   ./1_wave3_bidsconversion.sh
+   ./1_wave4_bidsconversion.sh
+   ```
 
-```bash
-python 2_delete_excluded_runs.py <csv_file> <bids_directory>
-```
+   The scripts read subjects from `sublist_v1.txt`, `sublist_v2.txt`, `sublist_v3.txt`, and `sublist_v4.txt` for waves 1 through 4, respectively. Create these newline-delimited lists in the repository directory before running the corresponding wrapper.
 
-### 3. DWI Data Correction 
+2. **Select or remove runs, if needed.** `2_delete_excluded_runs.py` takes a CSV and the BIDS directory. The CSV must contain `SubjectID`, `session`, `data_type`, and `use_run` columns. For example, `SubjectID` is the ID without `sub-`, `session` is `ses-01` through `ses-04`, `data_type` is a BIDS datatype such as `dwi`, and `use_run` contains the selected filename entities and suffix (for example, `acq-1_run-01_T1w`). For each subject/session, the script removes the `run-##_` entity from the selected files and deletes remaining files with run entities. It writes a dated CSV report beside the input CSV.
 
-Process DWI data by wave:
+   ```bash
+   python 2_delete_excluded_runs.py <selection.csv> <bids_directory>
+   ```
 
-```bash
-python 3_wave1_correct_dwi_data.py <bids_dir> <subject_list>
-python 3_wave2_correct_dwi_data.py <bids_dir> <subject_list>
-python 3_wave3_correct_dwi_data.py <bids_dir> <subject_list>
-```
+3. **Correct DWI data.** The wave-specific scripts take the BIDS directory and a text file containing one VETSA ID per line:
 
-Key DWI processing steps:
-- Split files by phase encoding direction (AP/PA)
-- Extract b0 volumes for fieldmaps
-- Correct bval/bvec files
-- Update JSON metadata
+   ```bash
+   python 3_wave1_correct_dwi_data.py <bids_directory> <subject_list.txt>
+   python 3_wave2_correct_dwi_data.py <bids_directory> <subject_list.txt>
+   python 3_wave3_correct_dwi_data.py <bids_directory> <subject_list.txt>
+   python 3_wave4_correct_dwi_data.py <bids_directory> <subject_list.txt>
+   ```
 
-### 4. fMRI Processing
+   These scripts perform wave-specific operations such as splitting or renaming DWI data by phase-encoding direction, extracting EPI fieldmaps, and updating sidecar metadata and gradient files. The wave 4 script processes multi-shell DWI and uses the `vetsa_ucsd_multiband-dwi_bvals.txt` and `vetsa_ucsd_multiband-dwi_bvecs.txt` templates included beside the script.
 
-Process fMRI data (primarily Wave 2):
+4. **Prepare wave 2 fMRI, if applicable.** The script takes the BIDS directory and a newline-delimited subject list:
 
-```bash
-python 4_wave2_prep-fmri.py <bids_dir> <subject_list>
-```
+   ```bash
+   python 4_wave2_prep-fmri.py <bids_directory> <subject_list.txt>
+   ```
 
-Site-specific fMRI processing:
-- BU: Update JSON metadata only
-- UCSD: Split by phase encoding direction and handle alternating AP/PA volumes
+   Processing differs by acquisition site. The script updates task and fieldmap metadata and handles UCSD's alternating AP/PA volumes. It writes `successful_subjects.txt` and `unsuccessful_subjects.txt` in the BIDS directory.
 
-### 5. ID Recoding
+5. **Recode VETSA IDs to CIDs, if required.** Provide a key CSV with `VETSAID` and `CID` columns. By default, all `sub-*` directories are processed; `-s` optionally selects subjects from a text or CSV file containing one subject ID per line (the first CSV column is used). IDs in the list may include or omit the `sub-` prefix.
 
-Recode subject IDs:
+   ```bash
+   python 5_recode_to_cid.py \
+     --bids_dir <bids_directory> \
+     --key <id_mapping.csv> \
+     --subjects_list <subject_list.txt>
+   ```
 
-```bash
-python 5_recode_to_cid.py -b <bids_dir> -k <key_file> [-s <subjects>]
-```
+   Omit `--subjects_list` to process every subject directory in the BIDS directory.
 
-## Implementation Details
+## Important notes
 
-- Handles data from multiple sites (BU and UCSD)
-- Site-specific processing pipelines 
-- Supports both single-shell and multi-shell DWI
-- Processes alternating phase encode fMRI
-- Maintains BIDS compliance throughout
+- The conversion and post-processing scripts are project-specific. Check their expected paths, subject lists, session labels, and acquisition assumptions against your dataset before use.
+- Processing scripts can rename, overwrite, or delete files in the BIDS directory. Keep a backup and test on a small copy before running them on the only copy of your data.
+- Review outputs and validate the resulting dataset with the [BIDS Validator](https://bids-standard.github.io/bids-validator/) before downstream analysis. These scripts support the VETSA workflow; they do not replace dataset-specific quality control.
 
+## License
 
-
-## Notes
-
-- BU and UCSD data require different processing approaches
-- DWI includes both single-shell and multi-shell acquisitions
-- fMRI uses different phase encoding schemes across sites
+This project is distributed under the MIT License; see [`LICENSE`](LICENSE).
