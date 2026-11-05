@@ -22,10 +22,40 @@
 			"suffix": "FLAIR",
 			"custom_entities": "acq-3D",
 			"criteria": {
-				"SeriesDescription": "*FLAIR*"
+				"SeriesDescription": "ORIG Sag CUBE FLAIR PROMO",
+				"InstitutionName": "UCSD CTiPM2"
+			}
+		},
+		
+		{
+			"datatype": "anat",
+			"suffix": "FLAIR",
+			"custom_entities": ["acq-3D", "rec-pure"],
+			"criteria": {
+				"SeriesDescription": "PU:Sag CUBE FLAIR PROMO",
+				"InstitutionName": "fmri3tw"
 			}
 		},
 
+		{
+			"datatype": "anat",
+			"suffix": "FLAIR",
+			"custom_entities": ["acq-3D", "rec-pure"],
+			"criteria": {
+				"SeriesDescription": "Sag CUBE FLAIR PROMO",
+				"InstitutionName": "UCSD CTiPM2"
+			}
+		},
+		
+		{
+			"datatype": "anat",
+			"suffix": "FLAIR",
+			"custom_entities": ["acq-3D"],
+			"criteria": {
+				"SeriesDescription": "Sag CUBE FLAIR PROMO",
+				"InstitutionName": "fmri3tw"
+			}
+		},
 		{
 			"datatype": "dwi",
 			"suffix": "dwi",
