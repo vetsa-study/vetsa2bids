@@ -1,4 +1,5 @@
 """
+
 This script is used to recode files and folders in a BIDS format directory from VETSAID 
 to CID. It takes in a key file containing the mapping from VETSAID to CID and recodes the 
 files and folders in the BIDS directory. It should also replace any instances of VETSAID
@@ -6,6 +7,7 @@ in the json files with CID.
 """
 
 import os
+
 import argparse
 import pandas as pd
 
@@ -16,6 +18,23 @@ def get_vetsaid_to_cid(key):
     """
     vetsaid_to_cid = dict(zip(key['VETSAID'], key['CID']))
     return vetsaid_to_cid
+
+
+def read_subjects_file(subjects_file):
+    """
+    Reads a txt or csv file with one subject ID per line. IDs may include the
+    'sub-' prefix; it is added if missing. Only the first column is used.
+    """
+    subjects = []
+    with open(subjects_file) as f:
+        for line in f:
+            subject = line.split(',')[0].strip().strip('"\'')
+            if not subject:
+                continue
+            if not subject.startswith('sub-'):
+                subject = 'sub-' + subject
+            subjects.append(subject)
+    return subjects
 
 
 def main(bids_dir, key_file, subjects_list=None):
@@ -32,7 +51,7 @@ def main(bids_dir, key_file, subjects_list=None):
     if subjects_list is None:
         subjects = [f for f in os.listdir(bids_dir) if f.startswith('sub-')]
     else:
-        subjects = subjects_list
+        subjects = read_subjects_file(subjects_list)
     
     # Loop through the subjects
     for subject in subjects:
@@ -70,7 +89,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Recodes VETSAID to CID for the VETSA dataset')
     parser.add_argument('-b', '--bids_dir', required=True, help='Path to the bids directory')
     parser.add_argument('-k', '--key', required=True, help='Path to the key file containing the mapping from VETSAID to CID')
-    parser.add_argument('-s', '--subjects_list', nargs='*', help='List of subjects to process')
+    parser.add_argument('-s', '--subjects_list', help='Path to a txt or csv file with one subject ID per line')
     args = parser.parse_args()
     bids_dir = args.bids_dir
     key_file = args.key
